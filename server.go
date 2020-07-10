@@ -219,7 +219,7 @@ type Router struct {
 }
 type RouterMap map[string][]*Router
 
-func setRouter(gin *gin.Engine, routerMap RouterMap, globalMiddleware []gin.HandlerFunc) { //注册路由
+func SetRouter(gin *gin.Engine, routerMap RouterMap, globalMiddleware []gin.HandlerFunc) { //注册路由
 	for k, v := range routerMap {
 		if k == "_" {
 			for _, r := range v {
