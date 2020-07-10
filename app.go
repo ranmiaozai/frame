@@ -55,7 +55,6 @@ func (app *app) Server(port int, pidFile ...string) *server {
 		server := &server{
 			port:   port,
 			router: make([]func(gin *gin.Engine), 0),
-			plugin: make([]func(gin *gin.Engine), 0),
 		}
 		//设置脚本pid进程文件
 		if len(pidFile) > 0 {

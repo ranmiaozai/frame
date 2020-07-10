@@ -22,7 +22,6 @@ type server struct {
 	port       int //监听端口
 	httpServer *http.Server
 	router     []func(gin *gin.Engine)
-	plugin     []func(gin *gin.Engine)
 	pidFile    string
 }
 
