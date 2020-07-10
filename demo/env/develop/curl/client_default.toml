@@ -1,6 +1,0 @@
-keepAlive=true
-timeout=2
-maxIdleConns=100
-maxIdleConnsPerHost=50
-idleConnTimeout=60
-proxyUrl=""
