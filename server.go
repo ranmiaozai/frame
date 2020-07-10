@@ -8,8 +8,11 @@ import (
 	"net/http"
 	"os"
 	"os/signal"
+	"reflect"
+	"runtime"
 	"runtime/debug"
 	"strconv"
+	"strings"
 	"syscall"
 	"time"
 )
@@ -183,21 +186,12 @@ func (server *server) initRoute() *gin.Engine {
 	for _, f := range server.router {
 		f(route)
 	}
-	for _, f := range server.plugin {
-		f(route)
-	}
 	return route
 }
 
 //注册路由
 func (server *server) RegisterRoute(f func(gin *gin.Engine)) *server {
 	server.router = append(server.router, f)
-	return server
-}
-
-//注册钩子
-func (server *server) RegisterPlugin(f func(gin *gin.Engine)) *server {
-	server.plugin = append(server.plugin, f)
 	return server
 }
 
@@ -209,4 +203,78 @@ func serverError(err error) {
 		}
 		App().Log.Error(msg, LogServerError)
 	}
+}
+
+
+
+//路由和中间件设置
+const MethodGet = "GET"
+const MethodPost = "POST"
+
+type Router struct {
+	Method            string
+	Uri               string
+	Handle            gin.HandlerFunc
+	SpecialMiddleware []gin.HandlerFunc
+	NoMiddleware      []gin.HandlerFunc
+}
+type RouterMap map[string][]*Router
+
+func setRouter(gin *gin.Engine, routerMap RouterMap, globalMiddleware []gin.HandlerFunc) { //注册路由
+	for k, v := range routerMap {
+		if k == "_" {
+			for _, r := range v {
+				middleware := filterMiddleware(globalMiddleware, r.SpecialMiddleware, r.NoMiddleware)
+				middleware = append(middleware, r.Handle)
+				uriArr := strings.Split(r.Uri, "|") //支持多个
+				for _, uri := range uriArr {
+					if r.Method == MethodGet {
+						gin.GET(formatUri(uri), middleware...)
+					} else if r.Method == MethodPost {
+						gin.POST(formatUri(uri), middleware...)
+					}
+				}
+			}
+		} else {
+			group := gin.Group(formatUri(k))
+			for _, r := range v {
+				middleware := filterMiddleware(globalMiddleware, r.SpecialMiddleware, r.NoMiddleware)
+				middleware = append(middleware, r.Handle)
+				uriArr := strings.Split(r.Uri, "|") //支持多个
+				for _, uri := range uriArr {
+					if r.Method == MethodGet {
+						group.GET(formatUri(uri), middleware...)
+					} else if r.Method == MethodPost {
+						group.POST(formatUri(uri), middleware...)
+					}
+				}
+			}
+		}
+	}
+}
+func formatUri(uri string) string {
+	return "/" + strings.TrimLeft(uri, "/")
+}
+
+func filterMiddleware(globalMiddleware []gin.HandlerFunc, specialMiddleware []gin.HandlerFunc, filterMiddleware []gin.HandlerFunc) []gin.HandlerFunc {
+	totalMiddleware := make(map[string]gin.HandlerFunc, 0)
+	for _, v := range globalMiddleware {
+		name := runtime.FuncForPC(reflect.ValueOf(v).Pointer()).Name()
+		totalMiddleware[name] = v
+	}
+	for _, v := range specialMiddleware {
+		name := runtime.FuncForPC(reflect.ValueOf(v).Pointer()).Name()
+		totalMiddleware[name] = v
+	}
+	for _, v := range filterMiddleware {
+		name := runtime.FuncForPC(reflect.ValueOf(v).Pointer()).Name()
+		if _, ok := totalMiddleware[name]; ok {
+			delete(totalMiddleware, name)
+		}
+	}
+	resultMiddleware := make([]gin.HandlerFunc, 0)
+	for _, v := range totalMiddleware {
+		resultMiddleware = append(resultMiddleware, v)
+	}
+	return resultMiddleware
 }
