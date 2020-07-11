@@ -44,6 +44,7 @@ func (server *server) Start() {
 
 		err := server.httpServer.ListenAndServe()
 		if err != nil && err != http.ErrServerClosed {
+			fmt.Println(err)
 			os.Exit(1)
 		}
 	}()
@@ -203,8 +204,6 @@ func serverError(err error) {
 		App().Log.Error(msg, LogServerError)
 	}
 }
-
-
 
 //路由和中间件设置
 const MethodGet = "GET"
