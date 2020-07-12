@@ -32,9 +32,6 @@ func (server *server) Start() {
 	//记录pid
 	oriPid := server.getPid() //获取原始pid
 	server.logPid()
-	go func() {
-		server.shutdown()
-	}()
 	//服务启动
 	server.httpServer = &http.Server{
 		Addr:         ":" + strconv.Itoa(server.port),
@@ -98,6 +95,7 @@ func (server *server) registerSignal() {
 		signal.Notify(sig, listenSignal...)
 		<-sig
 		server.stop()
+		server.shutdown()
 	}()
 }
 
