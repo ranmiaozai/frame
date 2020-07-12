@@ -29,26 +29,24 @@ type server struct {
 func (server *server) Start() {
 	//注册信号监听
 	server.registerSignal()
-
-	go func() {
-		//服务启动
-		server.httpServer = &http.Server{
-			Addr:         ":" + strconv.Itoa(server.port),
-			Handler:      server.initRoute(),
-			ReadTimeout:  3 * time.Second,
-			WriteTimeout: 5 * time.Second,
-		}
-
-		err := server.httpServer.ListenAndServe()
-		if err != nil && err != http.ErrServerClosed {
-			fmt.Println(err)
-			os.Exit(1)
-		}
-		//记录pid
-		server.logPid()
-	}()
-
+	//记录pid
+	oriPid := server.getPid() //获取原始pid
+	server.logPid()
 	server.shutdown()
+	//服务启动
+	server.httpServer = &http.Server{
+		Addr:         ":" + strconv.Itoa(server.port),
+		Handler:      server.initRoute(),
+		ReadTimeout:  3 * time.Second,
+		WriteTimeout: 5 * time.Second,
+	}
+	err := server.httpServer.ListenAndServe() //成功的话会阻塞住,不会执行之后 所以进程文件不会记录
+	if err != nil && err != http.ErrServerClosed {
+		//将原来pid重写回去
+		server.logPid(oriPid)
+		fmt.Println(err)
+		os.Exit(1)
+	}
 }
 
 //重启
@@ -140,8 +138,11 @@ func (server *server) kill() {
 }
 
 //记录Pid
-func (server *server) logPid() {
+func (server *server) logPid(setPid ...int) {
 	pid := os.Getpid()
+	if len(setPid) > 0 {
+		pid = setPid[0]
+	}
 	file, err := os.OpenFile(server.pidFile, os.O_RDWR|os.O_CREATE|os.O_TRUNC, 0777)
 	defer func() {
 		serverError(err)
