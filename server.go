@@ -33,20 +33,23 @@ func (server *server) Start() {
 	oriPid := server.getPid() //获取原始pid
 	server.logPid()
 	server.shutdown()
-	//服务启动
-	server.httpServer = &http.Server{
-		Addr:         ":" + strconv.Itoa(server.port),
-		Handler:      server.initRoute(),
-		ReadTimeout:  3 * time.Second,
-		WriteTimeout: 5 * time.Second,
-	}
-	err := server.httpServer.ListenAndServe() //成功的话会阻塞住,不会执行之后 所以进程文件不会记录
-	if err != nil && err != http.ErrServerClosed {
-		//将原来pid重写回去
-		server.logPid(oriPid)
-		fmt.Println(err)
-		os.Exit(1)
-	}
+	go func() {
+		//服务启动
+		server.httpServer = &http.Server{
+			Addr:         ":" + strconv.Itoa(server.port),
+			Handler:      server.initRoute(),
+			ReadTimeout:  3 * time.Second,
+			WriteTimeout: 5 * time.Second,
+		}
+
+		err := server.httpServer.ListenAndServe() //成功的话会阻塞住,不会执行之后 所以进程文件不会记录
+		if err != nil && err != http.ErrServerClosed {
+			//将原来pid重写回去
+			server.logPid(oriPid)
+			fmt.Println(err)
+			os.Exit(1)
+		}
+	}()
 }
 
 //重启
