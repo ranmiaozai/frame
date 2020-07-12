@@ -30,24 +30,23 @@ func (server *server) Start() {
 	//注册信号监听
 	server.registerSignal()
 
+	//服务启动
+	server.httpServer = &http.Server{
+		Addr:         ":" + strconv.Itoa(server.port),
+		Handler:      server.initRoute(),
+		ReadTimeout:  3 * time.Second,
+		WriteTimeout: 5 * time.Second,
+	}
+
+	err := server.httpServer.ListenAndServe()
+	if err != nil && err != http.ErrServerClosed {
+		fmt.Println(err)
+		os.Exit(1)
+	}
+
 	//记录pid
 	server.logPid()
 
-	go func() {
-		//服务启动
-		server.httpServer = &http.Server{
-			Addr:         ":" + strconv.Itoa(server.port),
-			Handler:      server.initRoute(),
-			ReadTimeout:  3 * time.Second,
-			WriteTimeout: 5 * time.Second,
-		}
-
-		err := server.httpServer.ListenAndServe()
-		if err != nil && err != http.ErrServerClosed {
-			fmt.Println(err)
-			os.Exit(1)
-		}
-	}()
 	server.shutdown()
 }
 
