@@ -52,6 +52,15 @@ func (config *config) IsDevelop() bool {
 	}
 	return false
 }
+func (config *config) IsOther() bool {
+	if config.Environment == EnvDevelop ||
+		config.Environment == EnvPre ||
+		config.Environment == EnvProduct ||
+		config.Environment == EnvBeta {
+		return false
+	}
+	return true
+}
 
 func (config *config) setAppName(appName string) {
 	config.AppName = appName
