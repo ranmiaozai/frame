@@ -2,6 +2,7 @@ package frame
 
 import (
 	"database/sql"
+	_ "github.com/go-sql-driver/mysql"
 	"math/rand"
 	"reflect"
 	"strconv"
