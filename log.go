@@ -15,6 +15,11 @@ type logTpl struct {
 	Type  string      `json:"type"`
 	Pid   int         `json:"pid"`
 }
+type logBehaviorTpl struct {
+	Msg  interface{} `json:"msg"`
+	Time string      `json:"time"`
+	Path string      `json:"path"`
+}
 
 var errorHandle func(msg string, logType string, logLevel string)
 
@@ -108,24 +113,44 @@ func (myLog *log) GetBehaviorPath() string {
 	return myLog.behaviorPath
 }
 func (myLog *log) log(tpl *logTpl) {
-	tpl.Pid = os.Getpid()
-	switch tpl.Msg.(type) {
-	case error:
-		tplMsg := fmt.Sprintf("%s", tpl.Msg)
-		tpl.Msg = tplMsg
-	default:
-		tplMsg, _ := json.Marshal(tpl.Msg)
-		tpl.Msg = string(tplMsg)
-	}
-	msg, err := json.Marshal(tpl)
-	logMsg := string(msg) + "\n"
-	if err != nil {
-		fmt.Println(err)
-		return
-	}
-	logFile := myLog.path + "/" + tpl.Level + ".log"
+	var logFile string
+	var logMsg string
 	if tpl.Level == LogTypeBehavior {
-		logFile = myLog.behaviorPath + "/" + tpl.Level + ".log"
+		behaviorTpl := &logBehaviorTpl{
+			Msg:  tpl.Msg,
+			Time: tpl.Time,
+			Path: tpl.Type,
+		}
+		switch behaviorTpl.Msg.(type) {
+		case error:
+			tplMsg := fmt.Sprintf("%s", behaviorTpl.Msg)
+			behaviorTpl.Msg = tplMsg
+		default:
+
+		}
+		msg, err := json.Marshal(behaviorTpl)
+		logMsg = string(msg) + "\n"
+		if err != nil {
+			fmt.Println(err)
+			return
+		}
+		logFile = myLog.behaviorPath + "/behavior.log"
+	} else {
+		tpl.Pid = os.Getpid()
+		switch tpl.Msg.(type) {
+		case error:
+			tplMsg := fmt.Sprintf("%s", tpl.Msg)
+			tpl.Msg = tplMsg
+		default:
+
+		}
+		msg, err := json.Marshal(tpl)
+		logMsg = string(msg) + "\n"
+		if err != nil {
+			fmt.Println(err)
+			return
+		}
+		logFile = myLog.path + "/" + tpl.Level + ".log"
 	}
 	file, err := os.OpenFile(logFile, os.O_APPEND|os.O_CREATE|os.O_RDWR, 0777)
 	if err != nil {
