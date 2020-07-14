@@ -3,6 +3,7 @@ package frame
 import (
 	"bytes"
 	"crypto/md5"
+	"encoding/json"
 	"fmt"
 	"os"
 	"os/exec"
@@ -70,6 +71,14 @@ func Md5(str string) string {
 	return md5str
 }
 
+//json非转义
+func JsonMarshal(t interface{}) ([]byte, error) {
+	buffer := &bytes.Buffer{}
+	encoder := json.NewEncoder(buffer)
+	encoder.SetEscapeHTML(false)
+	err := encoder.Encode(t)
+	return buffer.Bytes(), err
+}
 
 //执行系统命令并返回结果,如 res:=ExecShell("ls -al")
 func ExecShell(s string) (string, error) {

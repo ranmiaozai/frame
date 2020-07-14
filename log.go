@@ -1,7 +1,6 @@
 package frame
 
 import (
-	"encoding/json"
 	"fmt"
 	"os"
 	"sync"
@@ -128,7 +127,7 @@ func (myLog *log) log(tpl *logTpl) {
 		default:
 
 		}
-		msg, err := json.Marshal(behaviorTpl)
+		msg, err := JsonMarshal(behaviorTpl)
 		logMsg = string(msg) + "\n"
 		if err != nil {
 			fmt.Println(err)
@@ -144,7 +143,7 @@ func (myLog *log) log(tpl *logTpl) {
 		default:
 
 		}
-		msg, err := json.Marshal(tpl)
+		msg, err := JsonMarshal(tpl)
 		logMsg = string(msg) + "\n"
 		if err != nil {
 			fmt.Println(err)
