@@ -21,7 +21,8 @@ var errorHandle func(msg string, logType string, logLevel string)
 //日志记录结构体
 // 通过frame.App().Log 进行使用
 type log struct {
-	path string
+	path         string
+	behaviorPath string
 }
 
 //定义几种错误级别
@@ -29,6 +30,7 @@ const LogTypeError = "error"
 const LogTypeWarn = "warn"
 const LogTypeInfo = "info"
 const LogTypeDebug = "debug"
+const LogTypeBehavior = "behavior" //行为日志
 
 var myLog *log
 var logOnce sync.Once
@@ -39,7 +41,8 @@ func getLog() *log {
 			myLog = &log{}
 			log := &struct {
 				Log struct {
-					Path string `toml:"path"`
+					Path         string `toml:"path"`
+					BehaviorPath string `toml:"behaviorPath"`
 				} `toml:"log"`
 			}{}
 			err := App().Env("app", log)
@@ -47,6 +50,7 @@ func getLog() *log {
 				panic(LogPathError)
 			}
 			myLog.path = log.Log.Path
+			myLog.behaviorPath = log.Log.BehaviorPath
 		}
 	})
 	return myLog
@@ -88,8 +92,20 @@ func (myLog *log) Warn(msg interface{}, contentName string) {
 	}
 	myLog.log(tpl)
 }
+func (myLog *log) Behavior(msg interface{}, contentName string) {
+	tpl := &logTpl{
+		Level: LogTypeBehavior,
+		Msg:   msg,
+		Time:  myLog.getLogTime(),
+		Type:  contentName,
+	}
+	myLog.log(tpl)
+}
 func (myLog *log) GetPath() string {
 	return myLog.path
+}
+func (myLog *log) GetBehaviorPath() string {
+	return myLog.behaviorPath
 }
 func (myLog *log) log(tpl *logTpl) {
 	tpl.Pid = os.Getpid()
@@ -108,6 +124,9 @@ func (myLog *log) log(tpl *logTpl) {
 		return
 	}
 	logFile := myLog.path + "/" + tpl.Level + ".log"
+	if tpl.Level == LogTypeBehavior {
+		logFile = myLog.behaviorPath + "/" + tpl.Level + ".log"
+	}
 	file, err := os.OpenFile(logFile, os.O_APPEND|os.O_CREATE|os.O_RDWR, 0777)
 	if err != nil {
 		fmt.Println(err)
@@ -116,7 +135,7 @@ func (myLog *log) log(tpl *logTpl) {
 	defer file.Close()
 	_, _ = file.Write([]byte(logMsg))
 	//增加一个对外方法可以进行其他操作
-	if errorHandle != nil {
+	if errorHandle != nil && tpl.Level != LogTypeBehavior {
 		errorHandle(logMsg, tpl.Type, tpl.Level)
 	}
 }
