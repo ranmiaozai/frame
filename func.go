@@ -1,6 +1,8 @@
 package frame
 
 import (
+	"bytes"
+	"encoding/json"
 	"fmt"
 	"strconv"
 )
@@ -132,4 +134,13 @@ func convertToString(v interface{}) string {
 	default:
 		return ""
 	}
+}
+
+//json非转义
+func jsonMarshal(t interface{}) ([]byte, error) {
+	buffer := &bytes.Buffer{}
+	encoder := json.NewEncoder(buffer)
+	encoder.SetEscapeHTML(false)
+	err := encoder.Encode(t)
+	return buffer.Bytes(), err
 }

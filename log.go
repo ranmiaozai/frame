@@ -127,8 +127,8 @@ func (myLog *log) log(tpl *logTpl) {
 		default:
 
 		}
-		msg, err := JsonMarshal(behaviorTpl)
-		logMsg = string(msg) + "\n"
+		msg, err := jsonMarshal(behaviorTpl)
+		logMsg = string(msg)
 		if err != nil {
 			fmt.Println(err)
 			return
@@ -143,8 +143,8 @@ func (myLog *log) log(tpl *logTpl) {
 		default:
 
 		}
-		msg, err := JsonMarshal(tpl)
-		logMsg = string(msg) + "\n"
+		msg, err := jsonMarshal(tpl)
+		logMsg = string(msg)
 		if err != nil {
 			fmt.Println(err)
 			return
