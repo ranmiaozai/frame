@@ -25,8 +25,7 @@ var errorHandle func(msg string, logType string, logLevel string)
 //日志记录结构体
 // 通过frame.App().Log 进行使用
 type log struct {
-	path         string
-	behaviorPath string
+	path string
 }
 
 //定义几种错误级别
@@ -54,7 +53,6 @@ func getLog() *log {
 				panic(LogPathError)
 			}
 			myLog.path = log.Log.Path
-			myLog.behaviorPath = log.Log.BehaviorPath
 		}
 	})
 	return myLog
@@ -108,11 +106,7 @@ func (myLog *log) Behavior(msg interface{}, contentName string) {
 func (myLog *log) GetPath() string {
 	return myLog.path
 }
-func (myLog *log) GetBehaviorPath() string {
-	return myLog.behaviorPath
-}
 func (myLog *log) log(tpl *logTpl) {
-	var logFile string
 	var logMsg string
 	if tpl.Level == LogTypeBehavior {
 		behaviorTpl := &logBehaviorTpl{
@@ -133,7 +127,6 @@ func (myLog *log) log(tpl *logTpl) {
 			fmt.Println(err)
 			return
 		}
-		logFile = myLog.behaviorPath + "/behavior.log"
 	} else {
 		tpl.Pid = os.Getpid()
 		switch tpl.Msg.(type) {
@@ -149,8 +142,35 @@ func (myLog *log) log(tpl *logTpl) {
 			fmt.Println(err)
 			return
 		}
-		logFile = myLog.path + "/" + tpl.Level + ".log"
 	}
+	now := time.Now()
+	timePath := fmt.Sprintf("%d%d%d", now.Year(), now.Month(), now.Day())
+	logPath:=myLog.path+"/" + tpl.Level+"/"+timePath
+	exists,err:=pathExists(myLog.path+"/" + tpl.Level)
+	if err!=nil{
+		fmt.Println("判断文件夹是否存在失败")
+		return
+	}
+	if !exists{
+		err=os.Mkdir(myLog.path+"/" + tpl.Level, os.ModePerm)
+		if err != nil {
+			fmt.Println(err)
+			return
+		}
+	}
+	exists,err=pathExists(logPath)
+	if err!=nil{
+		fmt.Println("判断文件夹是否存在失败")
+		return
+	}
+	if !exists{
+		err=os.Mkdir(logPath, os.ModePerm)
+		if err != nil {
+			fmt.Println(err)
+			return
+		}
+	}
+	logFile := logPath+"/"+ fmt.Sprintf("%d",now.Hour()) + ".log"
 	file, err := os.OpenFile(logFile, os.O_APPEND|os.O_CREATE|os.O_RDWR, 0777)
 	if err != nil {
 		fmt.Println(err)

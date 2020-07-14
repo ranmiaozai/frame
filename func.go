@@ -4,6 +4,7 @@ import (
 	"bytes"
 	"encoding/json"
 	"fmt"
+	"os"
 	"strconv"
 )
 
@@ -143,4 +144,16 @@ func jsonMarshal(t interface{}) ([]byte, error) {
 	encoder.SetEscapeHTML(false)
 	err := encoder.Encode(t)
 	return buffer.Bytes(), err
+}
+
+// 判断文件夹是否存在
+func pathExists(path string) (bool, error) {
+	_, err := os.Stat(path)
+	if err == nil {
+		return true, nil
+	}
+	if os.IsNotExist(err) {
+		return false, nil
+	}
+	return false, err
 }
