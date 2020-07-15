@@ -3,8 +3,11 @@ package frame
 import (
 	"bufio"
 	"context"
+	"crypto/rand"
+	"encoding/base64"
 	"fmt"
 	"github.com/gin-gonic/gin"
+	"io"
 	"net/http"
 	"os"
 	"os/signal"
@@ -275,8 +278,20 @@ func filterMiddleware(globalMiddleware []gin.HandlerFunc, specialMiddleware []gi
 		}
 	}
 	resultMiddleware := make([]gin.HandlerFunc, 0)
+	resultMiddleware[0] = requestId
 	for _, v := range totalMiddleware {
 		resultMiddleware = append(resultMiddleware, v)
 	}
 	return resultMiddleware
+}
+
+//注册统一请求id
+func requestId(c *gin.Context) {
+	b := make([]byte, 48)
+	if _, err := io.ReadFull(rand.Reader, b); err != nil {
+		c.Next()
+		return
+	}
+	c.Set("requestId", Md5(base64.URLEncoding.EncodeToString(b)))
+	c.Next()
 }
