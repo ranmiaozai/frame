@@ -277,7 +277,7 @@ func filterMiddleware(globalMiddleware []gin.HandlerFunc, specialMiddleware []gi
 			delete(totalMiddleware, name)
 		}
 	}
-	resultMiddleware := make([]gin.HandlerFunc, 0)
+	resultMiddleware := make([]gin.HandlerFunc, 1)
 	resultMiddleware[0] = requestId
 	for _, v := range totalMiddleware {
 		resultMiddleware = append(resultMiddleware, v)
