@@ -558,9 +558,9 @@ func (mysql *Mysql) Where(field string, value interface{}, ops ...string) Db {
 
 func (mysql *Mysql) MultiWhere(conditions map[string]interface{}) Db {
 	for k, v := range conditions {
-		if v==nil{
+		if v == nil {
 			mysql.WhereSql(k)
-		}else{
+		} else {
 			mysql.Where(k, v, "")
 		}
 	}
