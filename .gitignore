@@ -1,0 +1,3 @@
+logs/*
+vendor/*
+go.sum
