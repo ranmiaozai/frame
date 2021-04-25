@@ -1,4 +1,4 @@
-module frame
+module my_frame
 
 go 1.13
 
