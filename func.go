@@ -9,8 +9,15 @@ import (
 )
 
 /**
+获取应用名称
+*/
+func AppName() string {
+	return App().AppName
+}
+
+/**
 切片变成字符串切片
- */
+*/
 func convertSliceToStrings(s interface{}) []string {
 	result := make([]string, 0)
 	switch s.(type) {
@@ -89,7 +96,7 @@ func arrayChunk(data []map[string]interface{}, onceMaxCount int) [][]map[string]
 
 /**
 字符串加转义
- */
+*/
 func addSlashes(str string) string {
 	tmpRune := make([]rune, 0)
 	strRune := []rune(str)
@@ -107,7 +114,7 @@ func addSlashes(str string) string {
 
 /**
 任意字符变成字符串
- */
+*/
 func convertToString(v interface{}) string {
 	switch v.(type) {
 	case int:
