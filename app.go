@@ -1,7 +1,6 @@
 package frame
 
 import (
-	"frame/Test"
 	"github.com/gin-gonic/gin"
 	"runtime"
 	"sync"
