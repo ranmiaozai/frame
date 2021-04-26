@@ -1,3 +1,4 @@
 logs/*
 vendor/*
 go.sum
+go.mod
