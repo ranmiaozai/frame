@@ -1,6 +1,8 @@
 package main
 
-import "frame"
+import (
+	"frame"
+)
 
 func main() {
 	frame.App()
