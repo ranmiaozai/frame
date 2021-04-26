@@ -41,7 +41,6 @@ func (app *app) Init(environment string, appName string, envPath string) *app {
 	app.setEnvPath(envPath)
 	//初始化日志
 	app.Log = getLog()
-	Test.Abcd()
 	return app
 }
 
