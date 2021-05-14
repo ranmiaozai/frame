@@ -498,9 +498,49 @@ func (mysql *Mysql) condition(field string, value interface{}, op string) (strin
 	conditionSql := ""
 	switch reflect.TypeOf(value).String() {
 	case "[]interface {}":
-	case "[]string":
-	case "[]int":
 		value1 := value.([]interface{})
+		if op == "" {
+			op = "IN"
+		}
+		switch op {
+		case "IN":
+			count := len(value1)
+			conditionSql = field + " IN (" + strings.TrimRight(strings.Repeat("?,", count), ",") + ")"
+			for _, item := range value1 {
+				conditionParams = append(conditionParams, item)
+			}
+		case "NOT IN":
+			count := len(value1)
+			conditionSql = field + " NOT IN (" + strings.TrimRight(strings.Repeat("?,", count), ",") + ")"
+			for _, item := range value1 {
+				conditionParams = append(conditionParams, item)
+			}
+		default:
+			panic("this op not support an array value")
+		}
+	case "[]string":
+		value1 := value.([]string)
+		if op == "" {
+			op = "IN"
+		}
+		switch op {
+		case "IN":
+			count := len(value1)
+			conditionSql = field + " IN (" + strings.TrimRight(strings.Repeat("?,", count), ",") + ")"
+			for _, item := range value1 {
+				conditionParams = append(conditionParams, item)
+			}
+		case "NOT IN":
+			count := len(value1)
+			conditionSql = field + " NOT IN (" + strings.TrimRight(strings.Repeat("?,", count), ",") + ")"
+			for _, item := range value1 {
+				conditionParams = append(conditionParams, item)
+			}
+		default:
+			panic("this op not support an array value")
+		}
+	case "[]int":
+		value1 := value.([]int)
 		if op == "" {
 			op = "IN"
 		}
