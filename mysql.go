@@ -498,6 +498,8 @@ func (mysql *Mysql) condition(field string, value interface{}, op string) (strin
 	conditionSql := ""
 	switch reflect.TypeOf(value).String() {
 	case "[]interface {}":
+	case "[]string":
+	case "[]int":
 		value1 := value.([]interface{})
 		if op == "" {
 			op = "IN"
