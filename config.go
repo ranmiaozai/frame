@@ -66,8 +66,12 @@ func (config *config) setAppName(appName string) {
 	config.AppName = appName
 }
 
-func (config *config) setEnvPath(path string) {
-	config.EnvPath = path + "/" + config.Environment
+func (config *config) setEnvPath(path string, includeEnv ...bool) {
+	if len(includeEnv) > 0 && includeEnv[0] {
+		config.EnvPath = path
+	} else {
+		config.EnvPath = path + "/" + config.Environment
+	}
 }
 
 //读取配置文件内容
