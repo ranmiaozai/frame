@@ -30,14 +30,14 @@ func App() *app {
 // environment 环境变量
 // appName 应用名称
 // envPath 配置文件目录(不包含环境变量)
-func (app *app) Init(environment string, appName string, envPath string) *app {
+func (app *app) Init(environment string, appName string, envPath string, includeEnv ...bool) *app {
 	//设置多核心cpu并行
 	cpuNum := runtime.NumCPU() //获得当前设备的cpu核心数
 	runtime.GOMAXPROCS(cpuNum) //设置需要用到的cpu数量
 
 	app.setEnv(environment)
 	app.setAppName(appName)
-	app.setEnvPath(envPath)
+	app.setEnvPath(envPath,includeEnv...)
 	//初始化日志
 	app.Log = getLog()
 	return app
