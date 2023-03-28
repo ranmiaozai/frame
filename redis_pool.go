@@ -61,7 +61,7 @@ func GetRedis(groupName string) *redisGroup {
 		MaxActive:   masterConfig.MaxActive,
 		IdleTimeout: time.Duration(masterConfig.IdleTimeout) * time.Second,
 		Wait:        true, //超过最大连接数就阻塞等待
-		MaxConnLifetime: time.Duration(redisConfig.MaxConnLifetime) * time.Second, //连接生命周期
+		MaxConnLifetime: time.Duration(masterConfig.MaxConnLifetime) * time.Second, //连接生命周期
 		Dial: func() (redis.Conn, error) {
 			c, err := redis.Dial("tcp", masterConfig.Host+":"+
 				strconv.Itoa(masterConfig.Port),
