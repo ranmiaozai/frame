@@ -22,13 +22,14 @@ type redisHost struct {
 }
 
 type redisHostConfig struct {
-	Host        string `toml:"host"`
-	Port        int    `toml:"port"`
-	Password    string `toml:"password"`
-	Timeout     int    `toml:"timeout"`
-	MaxIdle     int    `toml:"MaxIdle"`
-	MaxActive   int    `toml:"MaxActive"`
-	IdleTimeout int    `toml:"IdleTimeout"`
+	Host            string `toml:"host"`
+	Port            int    `toml:"port"`
+	Password        string `toml:"password"`
+	Timeout         int    `toml:"timeout"`
+	MaxIdle         int    `toml:"MaxIdle"`
+	MaxActive       int    `toml:"MaxActive"`
+	IdleTimeout     int    `toml:"IdleTimeout"`
+	MaxConnLifetime int    `toml:"MaxConnLifetime"`
 }
 
 /**
@@ -60,6 +61,7 @@ func GetRedis(groupName string) *redisGroup {
 		MaxActive:   masterConfig.MaxActive,
 		IdleTimeout: time.Duration(masterConfig.IdleTimeout) * time.Second,
 		Wait:        true, //超过最大连接数就阻塞等待
+		MaxConnLifetime: time.Duration(redisConfig.MaxConnLifetime) * time.Second, //连接生命周期
 		Dial: func() (redis.Conn, error) {
 			c, err := redis.Dial("tcp", masterConfig.Host+":"+
 				strconv.Itoa(masterConfig.Port),
@@ -85,6 +87,7 @@ func GetRedis(groupName string) *redisGroup {
 			MaxActive:   slaveConfig.MaxActive,
 			IdleTimeout: time.Duration(slaveConfig.IdleTimeout) * time.Second,
 			Wait:        true, //超过最大连接数就阻塞等待
+			MaxConnLifetime: time.Duration(slaveConfig.MaxConnLifetime) * time.Second, //连接生命周期
 			Dial: func() (redis.Conn, error) {
 				c, err := redis.Dial("tcp", slaveConfig.Host+":"+
 					strconv.Itoa(slaveConfig.Port),
